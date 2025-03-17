@@ -1,0 +1,96 @@
+.login-container {
+    width: 100%;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container form {
+    width: 17rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.login-container form h4 {
+    color: red;
+}
+
+.input-box {
+    width: 100%;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.input-box .icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #656565;
+}
+
+.input-box .pass-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.25rem;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.input-box input[name='password'] {
+    padding-right: 2.25rem;
+}
+
+.input-box:has(input:focus) .pass-icon,
+.input-box .pass-icon:active {
+    opacity: 1;
+}
+
+.input-box:has(input:focus),
+.input-box:has(.pass-icon:active) {
+    outline: 2px solid #000;
+}
+
+.login-container form p {
+    font-weight: 500;
+}
+
+.login-container form p:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.login-container form button {
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    background-color: black;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 550;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.login-container form button:hover {
+    background-color: #353535;
+}
+
+.login-container form button:active {
+    transform: scale(0.95);
+}
