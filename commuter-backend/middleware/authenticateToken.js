@@ -1,7 +1,8 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const jwt = require("jsonwebtoken")
+const User = require("../models/User")
+require("dotenv").config()
 
-const JWT_SECRET = process.env.JWT_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+const JWT_SECRET = process.env.JWT_TOKEN
 
 const authenticateToken = async (req, res, next) => {
     const token = req.header("Authorization")?.split(" ")[1]
@@ -9,13 +10,13 @@ const authenticateToken = async (req, res, next) => {
 
     try {
         const verified = jwt.verify(token, JWT_SECRET)
-        const userId = verified.id
-        const username = await User.findById(userId).select("username")
-        req.user = username
+        const user = await User.findById(verified.id).select("username")
+        if (!user) return res.status(404).send("User not found")
+        req.user = user
         next()
     } catch (error) {
         res.status(403).send("Invalid Token")
     }
-};
+}
 
 module.exports = authenticateToken

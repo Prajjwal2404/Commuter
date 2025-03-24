@@ -10,6 +10,12 @@ Commuter is a web application that allows users to:
 - Search for locations using Google Places Autocomplete
 - Track their current location in real-time
 - Calculate routes between destinations
+- View route details including distance and duration
+- Toggle between different transportation modes (Car, Bicycle, Walking, Transit)
+- Save home and work addresses for quick navigation
+- View detailed transit instructions when using public transportation
+- Access route history for previous trips
+- Manage user profile settings
 
 ## Tech Stack
 
@@ -18,6 +24,14 @@ Commuter is a web application that allows users to:
 - Google Maps API (Places, Maps)
 - CSS for styling
 - JWT for authentication
+
+### React 19 Features Used
+
+- Modern Hooks API
+- Suspense for data fetching
+- useContext for global state management
+- `flushSync` for controlled state updates
+- `use` hook for promise resolution
 
 ### Backend
 - Express.js
@@ -109,19 +123,30 @@ Commuter/
 ├── commuter/                 # Frontend
 │   ├── public/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── App.jsx
-│   │   ├── Map.jsx
-│   │   ├── Login.jsx
-│   │   └── ...
+│   │   ├── Components/       # Shared components
+│   │   │   ├── Search.jsx    # Places search component
+│   │   │   └── useUser.jsx   # User context
+│   │   ├── Login/            # Login related components
+│   │   │   ├── Login.jsx
+│   │   │   └── Login.css
+│   │   ├── Map/              # Map related components
+│   │   │   ├── Map.jsx       # Main map component
+│   │   │   └── Map.css
+│   │   ├── App.jsx           # Main application component
+│   │   ├── main.jsx          # Application entry point
+│   │   └── index.css         # Global styles
 │   ├── package.json
 │   └── vite.config.js
 │
 └── commuter-backend/         # Backend
     ├── middleware/
+    │   └── authenticateToken.js  # JWT authentication middleware
     ├── models/
+    │   └── User.js           # User model with history and addresses
     ├── routes/
-    ├── server.js
+    │   ├── auth.js           # Authentication routes
+    │   └── history.js        # Route history endpoints
+    ├── server.js             # Express server setup
     └── package.json
 ```
 
@@ -133,6 +158,42 @@ Commuter/
 - Current location tracking
 - User profile and statistics
 
-## License
+## User Account Features
 
-[MIT License](LICENSE)
+- **Account Management**: Users can create accounts and log in securely
+- **Address Management**: Save home and work addresses for quick navigation
+- **Route History**: View a history of previous routes taken
+- **Profile Settings**: Personalize your commuting experience
+
+
+## Screenshots
+
+### Map Interface
+![Commuter App Interface](screenshots/screenshot1.png)
+*The main App screen showing the Map of the current location, search fields, and multiple controls.*
+
+### Daily Commute Navigation
+![Daily Commute Navigation](screenshots/screenshot2.png)
+*Navigation showing the route between home and work addresses with traffic information.*
+
+### Transit Mode Navigation
+![Transit Mode Navigation](screenshots/screenshot3.png)
+*Detailed public transportation route with step-by-step transit instructions.*
+
+### Account Details
+![Account Details](screenshots/screenshot4.png)
+*User account details showing saved home and work addresses.*
+
+### Address Configuration
+![Address Configuration](screenshots/screenshot5.png)
+*Form for setting and updating home and work addresses using Google Places Autocomplete.*
+
+### Route History
+![Route History](screenshots/screenshot6.png)
+*History of previous routes taken by the user, sorted by most recent.*
+
+### Login Interface
+![Login Interface](screenshots/screenshot7.png)
+*The login and registration screen for user authentication.*
+
+---

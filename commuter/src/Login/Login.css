@@ -82,7 +82,7 @@
     background-color: black;
     color: #fff;
     font-size: 1.1rem;
-    font-weight: 550;
+    font-weight: 500;
     cursor: pointer;
     transition: background-color 0.25s ease, transform 0.25s ease;
 }
@@ -93,4 +93,17 @@
 
 .login-container form button:active {
     transform: scale(0.95);
+}
+
+.login-container form .submitting-btn {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    animation: blinking 1s infinite linear;
+}
+
+@keyframes blinking {
+    50% {
+        color: #000;
+    }
 }

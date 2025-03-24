@@ -1,49 +1,54 @@
-import React, { useLayoutEffect, useState } from 'react'
-import Map from './Map'
-import Login from './Login'
+import React, { use, Suspense, useRef, useContext } from 'react'
+import { flushSync } from 'react-dom'
+import useUser from './Components/useUser'
+import Login from './Login/Login'
+import Map from './Map/Map'
 
 const App = () => {
 
-    const [loggedIn, setLoggedIn] = useState(false)
-    const [user, setUser] = useState(null)
-
-    const token = localStorage.getItem("token")
-
-    useLayoutEffect(() => {
-
-        if (token) {
-            fetch("http://localhost:5000/auth/verify", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("Token is invalid")
-                    }
-                    return response.json()
-                })
-                .then((data) => {
-                    setLoggedIn(true)
-                    setUser(data.user)
-                })
-                .catch((error) => {
-                    console.error(error)
-                    localStorage.removeItem("token")
-                    setLoggedIn(false)
-                    setUser(null)
-                })
-        } else {
-            setLoggedIn(false)
-            setUser(null)
-        }
-    }, [])
+    const verifyAttempt = useRef(false)
 
     return (
-        loggedIn ? <Map user={user} setLoggedIn={setLoggedIn} setUser={setUser} /> :
-            <Login setLoggedIn={setLoggedIn} setUser={setUser} />
+        <Suspense fallback={<div className='loading' />}>
+            <Content verifyAttempt={verifyAttempt} />
+        </Suspense>
     )
+}
+
+const Content = ({ verifyAttempt }) => {
+
+    const { user, setUser } = useContext(useUser)
+
+    const verifyToken = async () => {
+        verifyAttempt.current = true
+        const token = localStorage.getItem("token")
+        try {
+            if (token) {
+                const response = await fetch("http://localhost:5000/auth/verify", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                if (!response.ok) {
+                    const message = await response.text()
+                    throw new Error(message)
+                }
+                const data = await response.json()
+                flushSync(() => setUser(data.user))
+            }
+        } catch (error) {
+            console.error(error)
+            localStorage.removeItem("token")
+        }
+    }
+
+    !verifyAttempt.current && use(verifyToken())
+
+    return (
+        user ? <Map /> : <Login />
+    )
+
 }
 
 export default App

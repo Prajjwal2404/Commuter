@@ -12,3 +12,22 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #eaeaea;
 }
+
+.loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75px;
+  height: 75px;
+  border: 8px solid #000;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
