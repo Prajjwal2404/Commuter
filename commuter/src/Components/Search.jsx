@@ -174,6 +174,7 @@ const saveHistory = async (origin, destination) => {
 
     const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history/save`, {
         method: "POST",
+        mode: 'cors',
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
@@ -192,6 +193,7 @@ const updateHistory = async (id) => {
 
     const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history/update/${id}`, {
         method: "PUT",
+        mode: 'cors',
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`

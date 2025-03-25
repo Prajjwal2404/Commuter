@@ -81,6 +81,7 @@ const Map = () => {
         try {
             const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/addresses`, {
                 method: "POST",
+                mode: 'cors',
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
@@ -188,6 +189,7 @@ const fetchAddresses = async () => {
     try {
         const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/addresses`, {
             method: "GET",
+            mode: 'cors',
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
@@ -210,6 +212,7 @@ const fetchHistory = async () => {
     try {
         const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history`, {
             method: "GET",
+            mode: 'cors',
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`

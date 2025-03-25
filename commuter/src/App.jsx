@@ -26,6 +26,7 @@ const Content = ({ verifyAttempt }) => {
             if (token) {
                 const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/verify`, {
                     method: "GET",
+                    mode: 'cors',
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

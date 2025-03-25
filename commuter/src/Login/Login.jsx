@@ -18,6 +18,7 @@ const Login = () => {
         const url = register ? `${domain}/auth/register` : `${domain}/auth/login`
         const options = {
             method: 'POST',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
