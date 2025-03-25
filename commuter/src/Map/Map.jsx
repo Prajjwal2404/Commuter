@@ -1,6 +1,6 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from "react"
 import { GoogleMap, LoadScript, Marker, DirectionsRenderer, TrafficLayer, Autocomplete } from "@react-google-maps/api"
-import PlacesSearch from "../components/Search"
+import PlacesSearch from "../Components/Search"
 import { MdOutlineLocationSearching, MdHistory } from "react-icons/md"
 import { IoPerson, IoClose } from "react-icons/io5"
 import useUser from "../Components/useUser"
