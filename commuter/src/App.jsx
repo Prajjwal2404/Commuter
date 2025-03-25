@@ -1,5 +1,4 @@
 import React, { use, Suspense, useRef, useContext } from 'react'
-import { flushSync } from 'react-dom'
 import useUser from './Components/useUser'
 import Login from './Login/Login'
 import Map from './Map/Map'
@@ -20,7 +19,6 @@ const Content = ({ verifyAttempt }) => {
     const { user, setUser } = useContext(useUser)
 
     const verifyToken = async () => {
-        verifyAttempt.current = true
         const token = localStorage.getItem("token")
         try {
             if (token) {
@@ -36,15 +34,24 @@ const Content = ({ verifyAttempt }) => {
                     throw new Error(message)
                 }
                 const data = await response.json()
-                flushSync(() => setUser(data.user))
+                verifyAttempt.current = true
+                setUser(data.user)
+                return data.user
             }
         } catch (error) {
             console.error(error)
             localStorage.removeItem("token")
         }
+        verifyAttempt.current = true
+        return null
     }
 
-    !verifyAttempt.current && use(verifyToken())
+    if (!verifyAttempt.current) {
+        const data = use(verifyToken())
+        return (
+            data ? <Map /> : <Login />
+        )
+    }
 
     return (
         user ? <Map /> : <Login />
