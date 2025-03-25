@@ -24,7 +24,7 @@ const Content = ({ verifyAttempt }) => {
         const token = localStorage.getItem("token")
         try {
             if (token) {
-                const response = await fetch("http://localhost:5000/auth/verify", {
+                const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/verify`, {
                     method: "GET",
                     headers: {
                         Authorization: `Bearer ${token}`

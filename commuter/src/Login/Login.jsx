@@ -14,7 +14,8 @@ const Login = () => {
     async function action(_, formData) {
         const username = formData.get('username')
         const password = formData.get('password')
-        const url = register ? 'http://localhost:5000/auth/register' : 'http://localhost:5000/auth/login'
+        const domain = import.meta.env.VITE_DOMAIN
+        const url = register ? `${domain}/auth/register` : `${domain}/auth/login`
         const options = {
             method: 'POST',
             headers: {

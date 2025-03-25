@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5"
 import { MdHomeWork } from "react-icons/md"
 import { IoMdCar, IoMdBicycle, IoMdWalk, IoMdTrain } from "react-icons/io"
 
-const PlacesSearch = ({ directionsResponse, setDirectionsResponse, history, handleLocationReset, addresses, openAccount }) => {
+const PlacesSearch = ({ directionsResponse, setDirectionsResponse, handleLocationReset, addresses, openAccount, history }) => {
     const originRef = useRef(null)
     const destinationRef = useRef(null)
     const [travelMode, setTravelMode] = useState("DRIVING")
@@ -62,8 +62,8 @@ const PlacesSearch = ({ directionsResponse, setDirectionsResponse, history, hand
             openAccount()
             return
         }
-        originRef.current.value = addresses?.home
-        destinationRef.current.value = addresses?.work
+        originRef.current.value = addresses.home
+        destinationRef.current.value = addresses.work
         calculateRoute()
     }
 
@@ -172,7 +172,7 @@ const saveHistory = async (origin, destination) => {
     const token = localStorage.getItem("token")
     const timestamp = new Date()
 
-    const response = await fetch("http://localhost:5000/history/save", {
+    const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history/save`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -190,7 +190,7 @@ const updateHistory = async (id) => {
     const token = localStorage.getItem("token")
     const timestamp = new Date()
 
-    const response = await fetch(`http://localhost:5000/history/update/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history/update/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",

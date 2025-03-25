@@ -10,11 +10,11 @@ const historySchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    history: [historySchema],
     addresses: {
         home: { type: String, default: "" },
         work: { type: String, default: "" }
-    }
+    },
+    history: [historySchema]
 })
 
 UserSchema.pre("save", async function (next) {

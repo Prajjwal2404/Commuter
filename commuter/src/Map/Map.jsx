@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { useContext, useLayoutEffect, useRef, useState } from "react"
 import { GoogleMap, LoadScript, Marker, DirectionsRenderer, TrafficLayer, Autocomplete } from "@react-google-maps/api"
 import PlacesSearch from "../components/Search"
 import { MdOutlineLocationSearching, MdHistory } from "react-icons/md"
@@ -35,31 +35,20 @@ const Map = () => {
         })
     }
 
+    const [addresses, setAddresses] = useState({ home: "", work: "" })
+    const [editingAddresses, setEditingAddresses] = useState(false)
     const [directionsResponse, setDirectionsResponse] = useState(null)
     const [history, setHistory] = useState([])
     const accountRef = useRef()
     const historyRef = useRef()
 
     useLayoutEffect(() => {
-        const fetchHistory = async () => {
-            const token = localStorage.getItem("token")
-            const response = await fetch("http://localhost:5000/history", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            if (response.ok) {
-                const data = await response.json()
-                const historySorted = data.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                setHistory(historySorted)
-            } else {
-                console.error("Error fetching history:", await response.text())
-            }
-        }
-        fetchHistory()
-    }, [directionsResponse])
+        fetchAddresses().then(res => {
+            res && setAddresses(res)
+            res.home && res.work ? setEditingAddresses(false) : setEditingAddresses(true)
+        })
+    }, [])
+    useLayoutEffect(() => { fetchHistory().then(res => res && setHistory(res)) }, [directionsResponse])
 
     const openAccount = () => {
         accountRef.current?.showModal()
@@ -82,48 +71,15 @@ const Map = () => {
         setUser(null)
     }
 
-    const [addresses, setAddresses] = useState({ home: "", work: "" })
-    const [editingAddresses, setEditingAddresses] = useState(false)
-    const homeAddressRef = useRef(null)
-    const workAddressRef = useRef(null)
-
-    useEffect(() => {
-        const fetchAddresses = async () => {
-            const token = localStorage.getItem("token")
-            try {
-                const response = await fetch("http://localhost:5000/auth/addresses", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                if (response.ok) {
-                    const data = await response.json()
-                    if (data.addresses) {
-                        setAddresses(data.addresses)
-                    }
-                    if (!data.addresses.home || !data.addresses.work) {
-                        setEditingAddresses(true)
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching addresses:", error)
-            }
-        }
-
-        fetchAddresses()
-    }, [])
-
-    const saveAddresses = async () => {
-        const home = homeAddressRef.current.value
-        const work = workAddressRef.current.value
+    const saveAddresses = async (formData) => {
+        const home = formData.get("home")
+        const work = formData.get("work")
 
         if (!home || !work) return
 
         const token = localStorage.getItem("token")
         try {
-            const response = await fetch("http://localhost:5000/auth/addresses", {
+            const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/addresses`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -136,7 +92,8 @@ const Map = () => {
                 setAddresses({ home, work })
                 setEditingAddresses(false)
             } else {
-                console.error("Error saving addresses:", await response.text())
+                const error = await response.text()
+                throw new Error(error)
             }
         } catch (error) {
             console.error("Error saving addresses:", error)
@@ -154,28 +111,25 @@ const Map = () => {
                 <div className="close-btn" onClick={closeAccount}><IoClose /></div>
                 <h2>{user}</h2>
                 <hr />
-
                 {!editingAddresses ? (
                     <>
                         <div className="address-section">
-                            <p><strong>Home:</strong> {addresses.home}</p>
-                            <p><strong>Work:</strong> {addresses.work}</p>
-                            <button type="button" className="edit-btn" onClick={() => setEditingAddresses(true)}>
-                                Edit Addresses
-                            </button>
+                            <p><strong>Home:</strong> {addresses.home || 'add home'}</p>
+                            <p><strong>Work:</strong> {addresses.work || 'add work'}</p>
+                            <button type="button" className="edit-btn" onClick={() => setEditingAddresses(true)}>Edit Addresses</button>
                         </div>
                     </>
                 ) : (
-                    <div className="address-form">
-                        <h3>Edit Addresses</h3>
+                    <form className="address-form" action={saveAddresses}>
                         <div className="address-input">
                             <label>Home Address</label>
                             <Autocomplete>
                                 <input
                                     type="text"
-                                    ref={homeAddressRef}
+                                    name="home"
                                     defaultValue={addresses.home}
                                     placeholder="Enter home address"
+                                    required
                                 />
                             </Autocomplete>
                         </div>
@@ -184,21 +138,18 @@ const Map = () => {
                             <Autocomplete>
                                 <input
                                     type="text"
-                                    ref={workAddressRef}
+                                    name="work"
                                     defaultValue={addresses.work}
                                     placeholder="Enter work address"
+                                    required
                                 />
                             </Autocomplete>
                         </div>
                         <div className="address-btns">
-                            <button type="button" onClick={() => setEditingAddresses(false)}>
-                                Cancel
-                            </button>
-                            <button type="button" className="save-btn" onClick={saveAddresses}>
-                                Save
-                            </button>
+                            <button type="button" onClick={() => setEditingAddresses(false)}>Cancel</button>
+                            <button type="submit" className="save-btn">Save</button>
                         </div>
-                    </div>
+                    </form>
                 )}
                 <hr />
                 <button type="button" onClick={logout}>Logout</button>
@@ -230,6 +181,51 @@ const Map = () => {
             </GoogleMap>
         </LoadScript>
     )
+}
+
+const fetchAddresses = async () => {
+    const token = localStorage.getItem("token")
+    try {
+        const response = await fetch(`${import.meta.env.VITE_DOMAIN}/auth/addresses`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (response.ok) {
+            const data = await response.json()
+            return data.addresses
+        } else {
+            const error = await response.text()
+            throw new Error(error)
+        }
+    } catch (error) {
+        console.error("Error fetching addresses:", error)
+    }
+}
+
+const fetchHistory = async () => {
+    const token = localStorage.getItem("token")
+    try {
+        const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (response.ok) {
+            const data = await response.json()
+            const historySorted = data.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            return historySorted
+        } else {
+            const error = await response.text()
+            throw new Error(error)
+        }
+    } catch (error) {
+        console.error("Error fetching history:", error.message)
+    }
 }
 
 export default Map
