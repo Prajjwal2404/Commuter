@@ -28,7 +28,7 @@ router.post("/save", authenticateToken, async (req, res) => {
 
         user.history.push({ origin, destination, timestamp })
         await user.save()
-        res.status(200)
+        res.status(200).send("History saved")
     } catch (error) {
         res.status(500).send(error.message)
     }
@@ -48,7 +48,7 @@ router.put("/update/:id", authenticateToken, async (req, res) => {
 
         historyItem.timestamp = timestamp
         await user.save()
-        res.status(200)
+        res.status(200).send("History updated")
     } catch (error) {
         res.status(500).send(error.message)
     }
