@@ -13,9 +13,20 @@ const Map = () => {
     const [center, setCenter] = useState({ lat: 0, lng: 0 })
     const [zoom, setZoom] = useState(15)
     const [locating, setLocating] = useState(false)
+    const [addresses, setAddresses] = useState({ home: "", work: "" })
+    const [editingAddresses, setEditingAddresses] = useState(false)
+    const [directionsResponse, setDirectionsResponse] = useState(null)
+    const [history, setHistory] = useState([])
+    const accountRef = useRef()
+    const historyRef = useRef()
 
     useLayoutEffect(() => {
         handleLocationReset()
+        fetchAddresses().then(res => {
+            res && setAddresses(res)
+            res.home && res.work ? setEditingAddresses(false) : setEditingAddresses(true)
+        })
+        fetchHistory().then(res => res && setHistory(res))
     }, [])
 
     const handleLocationReset = () => {
@@ -34,21 +45,6 @@ const Map = () => {
             setZoom(newZoom)
         })
     }
-
-    const [addresses, setAddresses] = useState({ home: "", work: "" })
-    const [editingAddresses, setEditingAddresses] = useState(false)
-    const [directionsResponse, setDirectionsResponse] = useState(null)
-    const [history, setHistory] = useState([])
-    const accountRef = useRef()
-    const historyRef = useRef()
-
-    useLayoutEffect(() => {
-        fetchAddresses().then(res => {
-            res && setAddresses(res)
-            res.home && res.work ? setEditingAddresses(false) : setEditingAddresses(true)
-        })
-    }, [])
-    useLayoutEffect(() => { fetchHistory().then(res => res && setHistory(res)) }, [directionsResponse])
 
     const openAccount = () => {
         accountRef.current?.showModal()
@@ -104,7 +100,7 @@ const Map = () => {
     return (
         <LoadScript googleMapsApiKey={import.meta.env.VITE_API_KEY}
             libraries={libraries} loadingElement={<div className="loading" />}>
-            <PlacesSearch directionsResponse={directionsResponse} history={history}
+            <PlacesSearch directionsResponse={directionsResponse} history={history} setHistory={setHistory}
                 setDirectionsResponse={setDirectionsResponse} handleLocationReset={handleLocationReset}
                 addresses={addresses} openAccount={openAccount} />
             <button className="account-btn" type="button" onClick={openAccount}><IoPerson /></button>

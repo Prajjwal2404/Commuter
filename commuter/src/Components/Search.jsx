@@ -4,7 +4,7 @@ import { IoClose } from "react-icons/io5"
 import { MdHomeWork } from "react-icons/md"
 import { IoMdCar, IoMdBicycle, IoMdWalk, IoMdTrain } from "react-icons/io"
 
-const PlacesSearch = ({ directionsResponse, setDirectionsResponse, handleLocationReset, addresses, openAccount, history }) => {
+const PlacesSearch = ({ directionsResponse, setDirectionsResponse, handleLocationReset, addresses, openAccount, history, setHistory }) => {
     const originRef = useRef(null)
     const destinationRef = useRef(null)
     const [travelMode, setTravelMode] = useState("DRIVING")
@@ -37,19 +37,18 @@ const PlacesSearch = ({ directionsResponse, setDirectionsResponse, handleLocatio
 
         try {
             const { routes, request } = await directionsService.route(directionsServiceOptions)
-            setDirectionsResponse({ routes, request })
+            setDirectionsResponse({
+                routes,
+                request,
+                transitSteps: mode === "TRANSIT" ? routes[0].legs[0].steps.filter(step =>
+                    step.travel_mode === "TRANSIT" || step.travel_mode === google.maps.TravelMode.TRANSIT) : []
+            })
             setDistance(routes[0].legs[0].distance.text)
             setDuration(routes[0].legs[0].duration_in_traffic?.text || routes[0].legs[0].duration.text)
 
-            if (mode === "TRANSIT") {
-                const transitSteps = routes[0].legs[0].steps.filter(step =>
-                    step.travel_mode === "TRANSIT" || step.travel_mode === google.maps.TravelMode.TRANSIT)
-
-                setDirectionsResponse({ routes, request, transitSteps })
-            }
             const inHistory = history.find(item => item.origin === originVal && item.destination === destinationVal)
-            !inHistory && saveHistory(originVal, destinationVal)
-            inHistory && updateHistory(inHistory._id)
+            const data = await (inHistory ? updateHistory(inHistory._id) : saveHistory(originVal, destinationVal))
+            data && setHistory(data)
         } catch (error) {
             console.error("Error fetching directions:", error)
             setDistance('no route found')
@@ -182,7 +181,11 @@ const saveHistory = async (origin, destination) => {
         body: JSON.stringify({ origin, destination, timestamp })
     })
 
-    if (!response.ok) {
+    if (response.ok) {
+        const data = await response.json()
+        const historySorted = data.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        return historySorted
+    } else {
         console.error("Error saving history:", await response.text())
     }
 }
@@ -201,7 +204,11 @@ const updateHistory = async (id) => {
         body: JSON.stringify({ timestamp })
     })
 
-    if (!response.ok) {
+    if (response.ok) {
+        const data = await response.json()
+        const historySorted = data.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        return historySorted
+    } else {
         console.error("Error updating history:", await response.text())
     }
 }
