@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from "react"
 import { GoogleMap, LoadScript, Marker, DirectionsRenderer, TrafficLayer, Autocomplete } from "@react-google-maps/api"
 import PlacesSearch from "../Components/Search"
-import { MdOutlineLocationSearching, MdHistory } from "react-icons/md"
+import { MdOutlineLocationSearching } from "react-icons/md"
 import { IoPerson, IoClose } from "react-icons/io5"
 import useUser from "../Components/useUser"
 import './Map.css'
@@ -16,9 +16,7 @@ const Map = () => {
     const [addresses, setAddresses] = useState({ home: "", work: "" })
     const [editingAddresses, setEditingAddresses] = useState(false)
     const [directionsResponse, setDirectionsResponse] = useState(null)
-    const [history, setHistory] = useState([])
     const accountRef = useRef()
-    const historyRef = useRef()
 
     useLayoutEffect(() => {
         handleLocationReset()
@@ -26,7 +24,16 @@ const Map = () => {
             res && setAddresses(res)
             res.home && res.work ? setEditingAddresses(false) : setEditingAddresses(true)
         })
-        fetchHistory().then(res => res && setHistory(res))
+        const addPacContainer = () => {
+            const pac_containers = document.querySelectorAll("body > .pac-container")
+            if (pac_containers.length !== 4) {
+                setTimeout(() => addPacContainer(), 100)
+                return
+            }
+            accountRef.current?.appendChild(pac_containers[2])
+            accountRef.current?.appendChild(pac_containers[3])
+        }
+        addPacContainer()
     }, [])
 
     const handleLocationReset = () => {
@@ -54,20 +61,12 @@ const Map = () => {
         accountRef.current?.close()
     }
 
-    const openHistory = () => {
-        historyRef.current?.showModal()
-    }
-
-    const closeHistory = () => {
-        historyRef.current?.close()
-    }
-
     const logout = () => {
         localStorage.removeItem("token")
         setUser(null)
     }
 
-    const saveAddresses = async (formData) => {
+    const saveAddresses = async formData => {
         const home = formData.get("home")
         const work = formData.get("work")
 
@@ -100,72 +99,50 @@ const Map = () => {
     return (
         <LoadScript googleMapsApiKey={import.meta.env.VITE_API_KEY}
             libraries={libraries} loadingElement={<div className="loading" />}>
-            <PlacesSearch directionsResponse={directionsResponse} history={history} setHistory={setHistory}
-                setDirectionsResponse={setDirectionsResponse} handleLocationReset={handleLocationReset}
-                addresses={addresses} openAccount={openAccount} />
+            <PlacesSearch directionsResponse={directionsResponse} setDirectionsResponse={setDirectionsResponse}
+                handleLocationReset={handleLocationReset} addresses={addresses} openAccount={openAccount} />
             <button className="account-btn" type="button" onClick={openAccount}><IoPerson /></button>
             <dialog className="account-dialog" ref={accountRef}>
                 <div className="close-btn" onClick={closeAccount}><IoClose /></div>
                 <h2>{user}</h2>
                 <hr />
-                {!editingAddresses ? (
-                    <>
-                        <div className="address-section">
-                            <p><strong>Home:</strong> {addresses.home || 'add home'}</p>
-                            <p><strong>Work:</strong> {addresses.work || 'add work'}</p>
-                            <button type="button" className="edit-btn" onClick={() => setEditingAddresses(true)}>Edit Addresses</button>
-                        </div>
-                    </>
-                ) : (
-                    <form className="address-form" action={saveAddresses}>
-                        <div className="address-input">
-                            <label>Home Address</label>
-                            <Autocomplete>
-                                <input
-                                    type="text"
-                                    name="home"
-                                    defaultValue={addresses.home}
-                                    placeholder="Enter home address"
-                                    required
-                                />
-                            </Autocomplete>
-                        </div>
-                        <div className="address-input">
-                            <label>Work Address</label>
-                            <Autocomplete>
-                                <input
-                                    type="text"
-                                    name="work"
-                                    defaultValue={addresses.work}
-                                    placeholder="Enter work address"
-                                    required
-                                />
-                            </Autocomplete>
-                        </div>
-                        <div className="address-btns">
-                            <button type="button" onClick={() => setEditingAddresses(false)}>Cancel</button>
-                            <button type="submit" className="save-btn">Save</button>
-                        </div>
-                    </form>
-                )}
+                <div className="address-section" style={{ display: editingAddresses && 'none' }}>
+                    <p><strong>Home:</strong> {addresses.home || 'add home'}</p>
+                    <p><strong>Work:</strong> {addresses.work || 'add work'}</p>
+                    <button type="button" className="edit-btn" onClick={() => setEditingAddresses(true)}>Edit Addresses</button>
+                </div>
+                <form className="address-form" action={saveAddresses} style={{ display: !editingAddresses && 'none' }}>
+                    <div className="address-input">
+                        <label>Home Address</label>
+                        <Autocomplete>
+                            <input
+                                type="text"
+                                name="home"
+                                defaultValue={addresses.home}
+                                placeholder="Enter home address"
+                                required
+                            />
+                        </Autocomplete>
+                    </div>
+                    <div className="address-input">
+                        <label>Work Address</label>
+                        <Autocomplete>
+                            <input
+                                type="text"
+                                name="work"
+                                defaultValue={addresses.work}
+                                placeholder="Enter work address"
+                                required
+                            />
+                        </Autocomplete>
+                    </div>
+                    <div className="address-btns">
+                        <button type="button" onClick={() => setEditingAddresses(false)}>Cancel</button>
+                        <button type="submit" className="save-btn">Save</button>
+                    </div>
+                </form>
                 <hr />
                 <button type="button" onClick={logout}>Logout</button>
-            </dialog>
-            <button className="history-btn" type="button" onClick={openHistory}><MdHistory /></button>
-            <dialog className="history-dialog" ref={historyRef}>
-                <div className="close-btn" onClick={closeHistory}><IoClose /></div>
-                <h2>History</h2>
-                <div className="history-list">
-                    {history.length === 0 ? <p>No history found</p> : history.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <div className="history-item">
-                                <p><strong>Origin:</strong> {item.origin}</p>
-                                <p><strong>Destination:</strong> {item.destination}</p>
-                            </div>
-                            {index !== history.length - 1 && <hr />}
-                        </React.Fragment>
-                    ))}
-                </div>
             </dialog>
             <button className="loc-reset-btn" type="button" onClick={handleLocationReset}>
                 <MdOutlineLocationSearching className={`${locating ? 'locating' : ''}`} />
@@ -200,30 +177,6 @@ const fetchAddresses = async () => {
         }
     } catch (error) {
         console.error("Error fetching addresses:", error)
-    }
-}
-
-const fetchHistory = async () => {
-    const token = localStorage.getItem("token")
-    try {
-        const response = await fetch(`${import.meta.env.VITE_DOMAIN}/history`, {
-            method: "GET",
-            mode: 'cors',
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            }
-        })
-        if (response.ok) {
-            const data = await response.json()
-            const historySorted = data.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-            return historySorted
-        } else {
-            const error = await response.text()
-            throw new Error(error)
-        }
-    } catch (error) {
-        console.error("Error fetching history:", error.message)
     }
 }
 

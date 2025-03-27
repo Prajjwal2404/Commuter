@@ -226,6 +226,19 @@
   transition: scale 0.5s ease;
 }
 
+.account-dialog {
+  overflow: visible;
+}
+
+.account-dialog .pac-container {
+  left: calc(1.5rem + 1px) !important;
+  top: calc(9rem + 2px) !important;
+}
+
+.account-dialog .pac-container:last-of-type {
+  top: calc(14rem + 2px) !important;
+}
+
 .history-dialog {
   width: 25rem;
 }
@@ -242,7 +255,7 @@
   right: 0;
   height: 2.5rem;
   width: 2.5rem;
-  border-radius: 0 0 0 15px;
+  border-radius: 0 15px 0 15px;
   background-color: #000;
   color: #fff;
   font-size: 1.5rem;
@@ -264,7 +277,6 @@
   flex-direction: column;
   justify-content: start;
   align-items: stretch;
-  gap: 1rem;
   overflow-y: auto;
 }
 
@@ -274,6 +286,17 @@
   justify-content: start;
   align-items: stretch;
   gap: 0.25rem;
+  cursor: pointer;
+  padding: 1rem 0.5rem;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.history-dialog .history-list .history-item:hover {
+  background-color: #e0e0e0;
+}
+
+.history-dialog .history-list .history-item:active {
+  transform: scale(0.95);
 }
 
 .account-dialog button {
